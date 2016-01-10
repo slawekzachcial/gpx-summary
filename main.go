@@ -1,8 +1,7 @@
-package main
+package gpxsummary
 
 import (
 	"encoding/xml"
-	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -173,13 +172,4 @@ func Process(filePath string) TrackInfo {
 	}
 
 	return info
-}
-
-func main() {
-	flag.Parse()
-
-	for _, filePath := range flag.Args() {
-		info := Process(filePath)
-		fmt.Println(info.Format())
-	}
 }
