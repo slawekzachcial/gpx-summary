@@ -8,6 +8,7 @@ import (
 	"time"
 	"strconv"
 	"math"
+	"path/filepath"
 )
 
 const (
@@ -143,12 +144,37 @@ func (info *TrackInfo) Format() string {
 		info.Pace())
 }
 
+func (info *TrackInfo) FormatHeader() string {
+	return fmt.Sprintf("File\tTime\tDuration [min]\tDistance [km]\tAscent [m]\tDescent [m]\tSpeed [km/h]\tPace [min/km]")
+}
+
+func (info *TrackInfo) FormatRow() string {
+	return fmt.Sprintf("%s\t%s\t%.2f\t%.1f\t%d\t%d\t%.1f\t%.1f",
+		info.FilePath(), info.StartTime().Local().Format(time.RFC1123), info.Duration().Minutes(),
+		info.Distance(), info.Ascent(), info.Descent(),
+		info.Speed(), info.Pace())
+}
+
+type TrackInfoArray []TrackInfo
+
+func (info TrackInfoArray) Len() int {
+	return len(info)
+}
+
+func (info TrackInfoArray) Swap(i, j int) {
+	info[i], info[j] = info[j], info[i]
+}
+
+func (info TrackInfoArray) Less(i, j int) bool {
+	return info[i].StartTime().Before(info[j].StartTime())
+}
+
 // Process extracts the GPX track summary from the given file.
 func Process(filePath string) TrackInfo {
 	file := value(os.Open(filePath)).(*os.File)
 	defer file.Close()
 
-	info := TrackInfo{filePath: filePath}
+	info := TrackInfo{filePath: filepath.Base(filePath)}
 	decoder := xml.NewDecoder(file)
 
 	for {
