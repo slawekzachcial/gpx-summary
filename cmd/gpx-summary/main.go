@@ -20,28 +20,29 @@ func main() {
 
 	if flag.NArg() == 0 {
 		flag.Usage()
-	} else {
-		tracks := make([]gpxsummary.TrackInfo, flag.NArg())
+		os.Exit(1)
+	}
 
-		for i, filePath := range flag.Args() {
-			tracks[i] = gpxsummary.Process(filePath)
+	tracks := make([]gpxsummary.TrackInfo, flag.NArg())
+
+	for i, filePath := range flag.Args() {
+		tracks[i] = gpxsummary.Process(filePath)
+	}
+
+	sort.Sort(gpxsummary.TrackInfoArray(tracks))
+
+	for k, info := range tracks {
+		if *asTable && k == 0 {
+			fmt.Println(info.FormatHeader())
+		}
+		if !*asTable && k > 0 {
+			fmt.Println("---")
 		}
 
-		sort.Sort(gpxsummary.TrackInfoArray(tracks))
-
-		for k, info := range tracks {
-			if *asTable && k == 0 {
-				fmt.Println(info.FormatHeader())
-			}
-			if !*asTable && k > 0 {
-				fmt.Println("---")
-			}
-
-			if *asTable {
-				fmt.Println(info.FormatRow())
-			} else {
-				fmt.Printf("%s\n", info.Format())
-			}
+		if *asTable {
+			fmt.Println(info.FormatRow())
+		} else {
+			fmt.Println(info.Format())
 		}
 	}
 }
